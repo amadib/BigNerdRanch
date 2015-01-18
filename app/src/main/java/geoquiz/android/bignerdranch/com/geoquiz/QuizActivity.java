@@ -26,6 +26,11 @@ public class QuizActivity extends Activity {
 
     private int mCurrentIndex = 0;
 
+    private void updateQuestion(){
+        int question = mQuestionBank[mCurrentIndex].getQuestion();
+        mQuestionTextView.setText(question);
+    }
+
     // SHORTCUT APPLE+F12 - go to method
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,18 +38,24 @@ public class QuizActivity extends Activity {
         setContentView(R.layout.activity_quiz);
 
         mQuestionTextView = (TextView)findViewById(R.id.question_text_view);
-        int question = mQuestionBank[mCurrentIndex].getQuestion();
-        mQuestionTextView.setText(question);
-
         // SHORTCUT Auto-suggest fix (Alt+Enter)
         // get reference to inflated Views
         mTrueButton = (Button) findViewById(R.id.true_button);
 
+
+        mNextButton = (Button) findViewById(R.id.next_button);
+        mNextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+                updateQuestion();
+            }
+        });
         // Setting listeners
         mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(QuizActivity.this, R.string.correct_toast,Toast.LENGTH_SHORT).show();
+                checkAnswer(true);
             }
         });
 
@@ -54,9 +65,11 @@ public class QuizActivity extends Activity {
         mFalseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(QuizActivity.this, R.string.incorrect_toast,Toast.LENGTH_SHORT).show();
+                checkAnswer(false);
             }
         });
+
+        updateQuestion();
     }
 
 
@@ -67,4 +80,14 @@ public class QuizActivity extends Activity {
         return true;
     }
 
+    private void checkAnswer(boolean userPressedTrue){
+
+        int messageResId = messageResId = R.string.incorrect_toast;;
+
+        if (userPressedTrue == mQuestionBank[mCurrentIndex].isTrueQuestion() ||
+                !userPressedTrue == !mQuestionBank[mCurrentIndex].isTrueQuestion() ){
+            messageResId = R.string.correct_toast;
+        }
+        Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
+    }
 }
