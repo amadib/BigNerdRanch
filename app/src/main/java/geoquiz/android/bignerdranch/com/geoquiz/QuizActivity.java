@@ -8,12 +8,15 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.LinkedList;
+
 public class QuizActivity extends Activity {
 
     private Button mTrueButton;
     private Button mFalseButton;
-
+    private Button mPreviousButton;
     private Button mNextButton;
+
     private TextView mQuestionTextView;
 
     private TrueFalse[] mQuestionBank = new TrueFalse[] {
@@ -24,6 +27,7 @@ public class QuizActivity extends Activity {
             new TrueFalse(R.string.question_oceans, true),
     };
 
+    private LinkedList<Integer> mPreviousIndex = new LinkedList<Integer>();
     private int mCurrentIndex = 0;
 
     private void updateQuestion(){
@@ -38,6 +42,14 @@ public class QuizActivity extends Activity {
         setContentView(R.layout.activity_quiz);
 
         mQuestionTextView = (TextView)findViewById(R.id.question_text_view);
+        mQuestionTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nextQuestion();
+                updateQuestion();
+            }
+        });
+
         // SHORTCUT Auto-suggest fix (Alt+Enter)
         // get reference to inflated Views
         mTrueButton = (Button) findViewById(R.id.true_button);
@@ -47,10 +59,23 @@ public class QuizActivity extends Activity {
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+                nextQuestion();
                 updateQuestion();
             }
         });
+
+        
+        mPreviousButton = (Button) findViewById(R.id.previous_button);
+        mPreviousButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mPreviousIndex.size() != 0){
+                    mCurrentIndex = mPreviousIndex.removeLast().intValue();
+                    updateQuestion();
+                }
+            }
+        });
+
         // Setting listeners
         mTrueButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,6 +95,11 @@ public class QuizActivity extends Activity {
         });
 
         updateQuestion();
+    }
+
+    private void nextQuestion() {
+        mPreviousIndex.add(mCurrentIndex);
+        mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
     }
 
 
